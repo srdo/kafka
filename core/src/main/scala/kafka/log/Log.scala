@@ -489,7 +489,7 @@ class Log(val dir: File,
    * @param maxLength The maximum number of bytes to read
    * @param maxOffset -The offset to read up to, exclusive. (i.e. the first offset NOT included in the resulting message set).
    *
-   * @throws OffsetOutOfRangeException If startOffset is beyond the log end offset or before the base offset of the first segment, or startOffset is more than 1 larger than maxOffset.
+   * @throws OffsetOutOfRangeException If startOffset is beyond the log end offset or before the base offset of the first segment, or startOffset is larger than maxOffset.
    * @return The fetch data information including fetch starting offset metadata and messages read
    */
   def read(startOffset: Long, maxLength: Int, maxOffset: Option[Long] = None): FetchDataInfo = {
@@ -499,18 +499,14 @@ class Log(val dir: File,
     // We create the local variables to avoid race conditions with updates to the log.
     val currentNextOffsetMetadata = nextOffsetMetadata
     val next = currentNextOffsetMetadata.messageOffset
-    
+    if(startOffset == next)
+      return FetchDataInfo(currentNextOffsetMetadata, MessageSet.Empty)
+
     var entry = segments.floorEntry(startOffset)
 
     // attempt to read beyond the log end offset is an error
     if(startOffset > next || entry == null)
       throw new OffsetOutOfRangeException("Request for offset %d but we only have log segments in the range %d to %d.".format(startOffset, segments.firstKey, next))
-          
-    if(startOffset == next)
-      return FetchDataInfo(currentNextOffsetMetadata, MessageSet.Empty)
-    maxOffset.foreach((offset) =>
-      if(startOffset == offset + 1)
-        return FetchDataInfo(LogOffsetMetadata(offset), MessageSet.Empty))
     
     maxOffset.foreach((offset) => 
       if(startOffset > offset)
