@@ -259,7 +259,9 @@ class LogTest extends JUnitSuite {
     } catch {
       case e: OffsetOutOfRangeException => // This is good
     }
-    assertEquals("Reading just beyond maxOffset should produce 0 byte read.", 0, log.read(1026, 1000, Some(1025)).messageSet.sizeInBytes)
+    val readInfoForJustBeyondMaxOffset = log.read(1026, 1000, Some(1025))
+    assertEquals("Reading just beyond maxOffset should produce 0 byte read.", 0, readInfoForJustBeyondMaxOffset.messageSet.sizeInBytes)
+    assertEquals("Reading just beyond maxOffset should only return message offset info", readInfoForJustBeyondMaxOffset.fetchOffsetMetadata.messageOffsetOnly(), true)
     try {
       // ensure we still get out of range if we read beyond the LogEndOffset and set maxOffset 
       log.read(1028, 1000, Some(1027))

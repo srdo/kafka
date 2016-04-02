@@ -505,12 +505,12 @@ class Log(val dir: File,
     // attempt to read beyond the log end offset is an error
     if(startOffset > next || entry == null)
       throw new OffsetOutOfRangeException("Request for offset %d but we only have log segments in the range %d to %d.".format(startOffset, segments.firstKey, next))
-    
-    var returnEmptySet = startOffset == next;
-    maxOffset.foreach((offset) =>
-      returnEmptySet = returnEmptySet || (startOffset == offset + 1))        
-    if(returnEmptySet)
+          
+    if(startOffset == next)
       return FetchDataInfo(currentNextOffsetMetadata, MessageSet.Empty)
+    maxOffset.foreach((offset) =>
+      if(startOffset == offset + 1)
+        return FetchDataInfo(LogOffsetMetadata(offset), MessageSet.Empty))
     
     maxOffset.foreach((offset) => 
       if(startOffset > offset)
