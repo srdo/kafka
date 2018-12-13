@@ -69,7 +69,7 @@ public class StoreChangelogReaderTest {
 
     private final MockStateRestoreListener callback = new MockStateRestoreListener();
     private final CompositeRestoreListener restoreListener = new CompositeRestoreListener(callback);
-    private final MockConsumer<byte[], byte[]> consumer = new MockConsumer<>(OffsetResetStrategy.NONE);
+    private final MockConsumer<byte[], byte[]> consumer = new MockConsumer<>(OffsetResetStrategy.EARLIEST);
     private final StateRestoreListener stateRestoreListener = new MockStateRestoreListener();
     private final TopicPartition topicPartition = new TopicPartition("topic", 0);
     private final LogContext logContext = new LogContext("test-reader ");
@@ -159,14 +159,16 @@ public class StoreChangelogReaderTest {
 
     @Test
     public void shouldRecoverFromOffsetOutOfRangeExceptionAndRestoreFromStart() {
+        final MockConsumer<byte[], byte[]> consumer = new MockConsumer<>(OffsetResetStrategy.NONE);
+        final StoreChangelogReader changelogReader = new StoreChangelogReader(consumer, Duration.ZERO, stateRestoreListener, logContext);
         final int messages = 10;
         final int startOffset = 5;
         final long expiredCheckpoint = 1L;
-        assignPartition(messages, topicPartition);
+        assignPartition(consumer, messages, topicPartition);
         consumer.updateBeginningOffsets(Collections.singletonMap(topicPartition, (long) startOffset));
         consumer.updateEndOffsets(Collections.singletonMap(topicPartition, (long) (messages + startOffset)));
 
-        addRecords(messages, topicPartition, startOffset);
+        addRecords(consumer, messages, topicPartition, startOffset);
         consumer.assign(Collections.<TopicPartition>emptyList());
 
         final StateRestorer stateRestorer = new StateRestorer(
@@ -383,7 +385,7 @@ public class StoreChangelogReaderTest {
 
     @Test
     public void shouldIgnoreNullKeysWhenRestoring() {
-        assignPartition(3, topicPartition);
+        assignPartition(consumer, 3, topicPartition);
         final byte[] bytes = new byte[0];
         consumer.addRecord(new ConsumerRecord<>(topicPartition.topic(), topicPartition.partition(), 0, bytes, bytes));
         consumer.addRecord(new ConsumerRecord<>(topicPartition.topic(), topicPartition.partition(), 1, (byte[]) null, bytes));
@@ -426,7 +428,7 @@ public class StoreChangelogReaderTest {
 
         assertTrue(changelogReader.restore(active).isEmpty());
 
-        addRecords(9, topicPartition, 1);
+        addRecords(consumer, 9, topicPartition, 1);
 
         setupConsumer(3, postInitialization);
         consumer.updateBeginningOffsets(Collections.singletonMap(postInitialization, 0L));
@@ -520,11 +522,11 @@ public class StoreChangelogReaderTest {
     @Test
     public void shouldNotThrowTaskMigratedExceptionIfEndOffsetGetsExceededDuringRestoreForSourceTopicEOSEnabled() {
         final int totalMessages = 10;
-        assignPartition(totalMessages, topicPartition);
+        assignPartition(consumer, totalMessages, topicPartition);
         // records 0..4 last offset before commit is 4
-        addRecords(5, topicPartition, 0);
+        addRecords(consumer, 5, topicPartition, 0);
         //EOS enabled so commit marker at offset 5 so records start at 6
-        addRecords(5, topicPartition, 6);
+        addRecords(consumer, 5, topicPartition, 6);
         consumer.assign(Collections.<TopicPartition>emptyList());
         // commit marker is 5 so ending offset is 12
         consumer.updateEndOffsets(Collections.singletonMap(topicPartition, 12L));
@@ -556,12 +558,13 @@ public class StoreChangelogReaderTest {
 
     private void setupConsumer(final long messages,
                                final TopicPartition topicPartition) {
-        assignPartition(messages, topicPartition);
-        addRecords(messages, topicPartition, 0);
+        assignPartition(consumer, messages, topicPartition);
+        addRecords(consumer, messages, topicPartition, 0);
         consumer.assign(Collections.<TopicPartition>emptyList());
     }
 
-    private void addRecords(final long messages,
+    private void addRecords(final MockConsumer<byte[], byte[]> consumer,
+                            final long messages,
                             final TopicPartition topicPartition,
                             final int startingOffset) {
         for (int i = 0; i < messages; i++) {
@@ -569,7 +572,8 @@ public class StoreChangelogReaderTest {
         }
     }
 
-    private void assignPartition(final long messages,
+    private void assignPartition(final MockConsumer<byte[], byte[]> consumer,
+                                 final long messages,
                                  final TopicPartition topicPartition) {
         consumer.updatePartitions(topicPartition.topic(),
                                   Collections.singletonList(

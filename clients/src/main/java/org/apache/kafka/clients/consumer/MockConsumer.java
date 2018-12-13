@@ -208,11 +208,8 @@ public class MockConsumer<K, V> implements Consumer<K, V> {
                 }
             }
         }
-        return new ConsumerRecords<>(results);
-    }
-
-    public synchronized void clearRecords() {
         this.records.clear();
+        return new ConsumerRecords<>(results);
     }
 
     public synchronized void addRecord(ConsumerRecord<K, V> record) {
