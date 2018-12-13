@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 
 /**
@@ -185,22 +186,33 @@ public class MockConsumer<K, V> implements Consumer<K, V> {
         final Map<TopicPartition, List<ConsumerRecord<K, V>>> results = new HashMap<>();
 
         for (Map.Entry<TopicPartition, List<ConsumerRecord<K, V>>> entry : this.records.entrySet()) {
-            if (!subscriptions.isPaused(entry.getKey())) {
+            if (!subscriptions.isPaused(entry.getKey()) && assignment().contains(entry.getKey())) {
                 final List<ConsumerRecord<K, V>> recs = entry.getValue();
                 for (final ConsumerRecord<K, V> rec : recs) {
                     if (beginningOffsets.get(entry.getKey()) != null && beginningOffsets.get(entry.getKey()) > subscriptions.position(entry.getKey())) {
-                        throw new OffsetOutOfRangeException(Collections.singletonMap(entry.getKey(), subscriptions.position(entry.getKey())));
+                        if (subscriptions.hasDefaultOffsetResetPolicy()) {
+                            subscriptions.requestOffsetReset(entry.getKey());
+                            resetOffsetPosition(entry.getKey());
+                        } else {
+                            throw new OffsetOutOfRangeException(Collections.singletonMap(entry.getKey(), subscriptions.position(entry.getKey())));
+                        }
                     }
+                }
+                final List<ConsumerRecord<K, V>> recsAfterPosition = recs.stream()
+                        .filter(rec -> rec.offset() >= subscriptions.position(entry.getKey()))
+                        .collect(Collectors.toList());
 
-                    if (assignment().contains(entry.getKey()) && rec.offset() >= subscriptions.position(entry.getKey())) {
-                        results.computeIfAbsent(entry.getKey(), partition -> new ArrayList<>()).add(rec);
-                        subscriptions.position(entry.getKey(), rec.offset() + 1);
-                    }
+                for (final ConsumerRecord<K, V> rec : recsAfterPosition) {
+                    results.computeIfAbsent(entry.getKey(), partition -> new ArrayList<>()).add(rec);
+                    subscriptions.position(entry.getKey(), rec.offset() + 1);
                 }
             }
         }
-        this.records.clear();
         return new ConsumerRecords<>(results);
+    }
+
+    public synchronized void clearRecords() {
+        this.records.clear();
     }
 
     public synchronized void addRecord(ConsumerRecord<K, V> record) {

@@ -98,4 +98,34 @@ public class MockConsumerTest {
         assertThat(records.isEmpty(), is(true));
     }
 
+    @Test
+    public void testConsumerResetsOffsetIfOutOfRange() {
+        TopicPartition partition = new TopicPartition("test", 0);
+        consumer.assign(Collections.singleton(partition));
+        consumer.addRecord(new ConsumerRecord<>(partition.topic(), partition.partition(), 0, null, null));
+        consumer.addRecord(new ConsumerRecord<>(partition.topic(), partition.partition(), 1, null, null));
+        consumer.updateBeginningOffsets(Collections.singletonMap(partition, 0L));
+        consumer.poll(Duration.ofMillis(1)); //Initialize consumer position
+        consumer.updateBeginningOffsets(Collections.singletonMap(partition, 1L));
+        consumer.seek(partition, 0L);
+        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1));
+        assertThat(records.count(), is(1));
+        ConsumerRecord<String, String> record = records.records(partition).get(0);
+        assertThat(record.offset(), is(1L));
+    }
+
+    @Test
+    public void testConsumerCanSeek() {
+        TopicPartition partition = new TopicPartition("test", 0);
+        consumer.assign(Collections.singleton(partition));
+        consumer.addRecord(new ConsumerRecord<>(partition.topic(), partition.partition(), 0, null, null));
+        consumer.updateBeginningOffsets(Collections.singletonMap(partition, 0L));
+        consumer.poll(Duration.ofMillis(1)); //Skip past first message
+        consumer.seek(partition, 0L);
+        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(1));
+        assertThat(records.count(), is(1));
+        ConsumerRecord<String, String> record = records.records(partition).get(0);
+        assertThat(record.offset(), is(0L));
+    }
+
 }
