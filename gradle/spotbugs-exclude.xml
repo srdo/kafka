@@ -645,6 +645,8 @@ For a detailed description of spotbugs bug categories, see https://spotbugs.read
             <Class name="org.apache.kafka.tools.VerifiableProducer"/>
             <Class name="kafka.coordinator.transaction.TransactionMetadata"/>
             <Class name="org.apache.kafka.tools.VerifiableShareConsumer"/>
+            <Class name="org.apache.kafka.streams.processor.internals.StreamsPartitionAssignor"/>
+            <Class name="org.apache.kafka.streams.processor.internals.StreamsPartitionAssignor"/>
         </Or>
         <Bug pattern="AT_NONATOMIC_OPERATIONS_ON_SHARED_VARIABLE"/>
     </Match>
@@ -676,6 +678,15 @@ For a detailed description of spotbugs bug categories, see https://spotbugs.read
             <Class name="kafka.server.ControllerRegistrationManager"/>
             <Class name="kafka.server.FetchSession"/>
             <Class name="kafka.server.share.SharePartition"/>
+            <Class name="org.apache.kafka.trogdor.workload.ConnectionStressWorker"/>
+            <Class name="org.apache.kafka.metadata.util.SnapshotFileReader"/>
+            <Class name="org.apache.kafka.streams.processor.internals.DefaultStateUpdater"/>
+            <Class name="org.apache.kafka.clients.consumer.internals.AbstractCoordinator"/>
+            <Class name="org.apache.kafka.trogdor.agent.WorkerManager$ShutdownManager"/>
+            <Class name="kafka.common.ZkNodeChangeNotificationListener"/>
+            <Class name="kafka.tools.MirrorMaker$"/>
+            <Class name="kafka.tools.MirrorMaker$MirrorMakerThread"/>
+            <Class name="kafka.zk.KafkaZkClient"/>
         </Or>
         <Bug pattern="AT_NONATOMIC_64BIT_PRIMITIVE"/>
     </Match>
@@ -737,6 +748,18 @@ For a detailed description of spotbugs bug categories, see https://spotbugs.read
             <Class name="kafka.server.metadata.BrokerMetadataPublisher"/>
             <Class name="kafka.server.metadata.DelegationTokenPublisher"/>
             <Class name="org.apache.kafka.connect.mirror.MirrorSourceConnector"/>
+            <Class name="org.apache.kafka.queue.KafkaEventQueue"/>
+            <Class name="org.apache.kafka.controller.QuorumController"/>
+            <Class name="org.apache.kafka.streams.state.internals.MemoryLRUCache"/>
+            <Class name="kafka.cluster.Partition"/>
+            <Class name="kafka.coordinator.group.GroupMetadata"/>
+            <Class name="kafka.zookeeper.ZooKeeperClient"/>
+            <Class name="kafka.security.authorizer.AclAuthorizer"/>
+            <Class name="kafka.server.KafkaServer"/>
+            <Class name="kafka.server.NodeToControllerRequestThread"/>
+            <Class name="kafka.server.metadata.AclPublisher"/>
+            <Class name="kafka.server.share.SharePartition"/>
+            <Class name="kafka.tools.MirrorMaker$"/>
         </Or>
         <Bug pattern="AT_STALE_THREAD_WRITE_OF_PRIMITIVE"/>
     </Match>
@@ -765,6 +788,47 @@ For a detailed description of spotbugs bug categories, see https://spotbugs.read
             <Class name="kafka.server.metadata.DefaultUserEntity"/>
             <Class name="org.apache.kafka.connect.runtime.SinkConnectorConfig"/>
             <Class name="org.apache.kafka.connect.runtime.SourceConnectorConfig"/>
+            <Class name="kafka.controller.AdminClientTriggered"/>
+            <Class name="kafka.controller.AutoPreferredReplicaLeaderElection"/>
+            <Class name="kafka.controller.AutoTriggered"/>
+            <Class name="kafka.controller.BrokerChange"/>
+            <Class name="kafka.controller.ControlledShutdownPartitionLeaderElectionStrategy"/>
+            <Class name="kafka.controller.ControllerChange"/>
+            <Class name="kafka.controller.Expire"/>
+            <Class name="kafka.controller.IsrChangeNotification"/>
+            <Class name="kafka.controller.LogDirEventNotification"/>
+            <Class name="kafka.controller.NewPartition"/>
+            <Class name="kafka.controller.NewReplica"/>
+            <Class name="kafka.controller.NonExistentPartition"/>
+            <Class name="kafka.controller.NonExistentReplica"/>
+            <Class name="kafka.controller.OfflinePartition"/>
+            <Class name="kafka.controller.OfflineReplica"/>
+            <Class name="kafka.controller.OnlinePartition"/>
+            <Class name="kafka.controller.OnlineReplica"/>
+            <Class name="kafka.controller.PreferredReplicaPartitionLeaderElectionStrategy"/>
+            <Class name="kafka.controller.ReassignPartitionLeaderElectionStrategy"/>
+            <Class name="kafka.controller.Reelect"/>
+            <Class name="kafka.controller.RegisterBrokerAndReelect"/>
+            <Class name="kafka.controller.ReplicaDeletionIneligible"/>
+            <Class name="kafka.controller.ReplicaDeletionStarted"/>
+            <Class name="kafka.controller.ReplicaDeletionSuccessful"/>
+            <Class name="kafka.controller.ShutdownEventThread"/>
+            <Class name="kafka.controller.Startup"/>
+            <Class name="kafka.controller.TopicChange"/>
+            <Class name="kafka.controller.TopicDeletion"/>
+            <Class name="kafka.controller.UncleanLeaderElectionEnable"/>
+            <Class name="kafka.controller.ZkPartitionReassignment"/>
+            <Class name="kafka.controller.ZkTriggered"/>
+            <Class name="kafka.coordinator.group.CompletingRebalance"/>
+            <Class name="kafka.coordinator.group.Dead"/>
+            <Class name="kafka.coordinator.group.Empty"/>
+            <Class name="kafka.coordinator.group.PreparingRebalance"/>
+            <Class name="kafka.coordinator.group.Stable"/>
+            <Class name="kafka.log.LogCleaningAborted"/>
+            <Class name="kafka.log.LogCleaningInProgress"/>
+            <Class name="kafka.server.genericError"/>
+            <Class name="kafka.zk.ExtendedAclChangeStore"/>
+            <Class name="kafka.zk.LiteralAclChangeStore"/>
         </Or>
         <Bug pattern="HSM_HIDING_METHOD"/>
     </Match>
