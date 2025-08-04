@@ -784,6 +784,13 @@ subprojects {
     jvmArgs = defaultJvmArgs
   }
 
+  // Disable SpotBugs when running with Java 24 due to compatibility issues
+if (JavaVersion.current().majorVersion.toInteger() == 24) {
+    tasks.withType(com.github.spotbugs.snom.SpotBugsTask).configureEach {
+        enabled = false
+    }
+}
+
   // Ignore core since its a scala project
   if (it.path != ':core') {
     if (userEnableTestCoverage) {
